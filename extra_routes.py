@@ -171,11 +171,28 @@ def register_extra_routes(app, login_required):
             conn = get_connection()
             try:
                 if action == "save":
-                    conn.execute("""
+                    cursor = conn.execute("""
                         INSERT INTO members
                             (name, phone, address, reg_date, baptism_date, position, memo)
                         VALUES (?, ?, ?, ?, ?, ?, ?)
                     """, (name, phone, address, reg_date, baptism_date, position, memo))
+                    # 새 교인의 member_no도 반드시 지정하여 이후 수정·삭제와 헌금자
+                    # 선택 화면에서 정상 조회되도록 합니다.
+                    new_id = cursor.lastrowid
+                    taken = conn.execute(
+                        "SELECT 1 FROM members WHERE member_no = ? AND rowid <> ?",
+                        (new_id, new_id),
+                    ).fetchone()
+                    if taken:
+                        next_no = conn.execute(
+                            "SELECT COALESCE(MAX(member_no), 0) + 1 FROM members"
+                        ).fetchone()[0]
+                    else:
+                        next_no = new_id
+                    conn.execute(
+                        "UPDATE members SET member_no = ? WHERE rowid = ?",
+                        (next_no, new_id),
+                    )
                     conn.commit()
                     flash("교인정보를 저장했습니다.", "success")
 

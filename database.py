@@ -196,6 +196,13 @@ def ensure_members_schema(conn):
 
     cur = conn.cursor()
 
+    # 교인 관리 화면이 사용하는 등록일/세례일 필드가 구형 DB에 없으면 추가합니다.
+    # 기존 데이터나 기존 baptism 열을 삭제하거나 덮어쓰지 않습니다.
+    for column_name in ("reg_date", "baptism_date"):
+        if column_name not in columns:
+            cur.execute(f"ALTER TABLE members ADD COLUMN {column_name} TEXT")
+            columns.append(column_name)
+
     # member_no 열이 없는 기존 DB에는 열을 추가합니다.
     if "member_no" not in columns:
         cur.execute(
