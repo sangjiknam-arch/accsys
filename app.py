@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import sqlite3
 from datetime import date
 from functools import wraps
 
@@ -974,6 +975,11 @@ def balance_sheet():
 
 register_extra_routes(app, login_required)
 
+# Gunicorn imports app:app without entering __main__. Initialize/migrate the
+# database on startup so existing users tables receive missing columns.
+# This uses CREATE TABLE IF NOT EXISTS and additive schema migrations;
+# it does NOT reset an existing administrator password or erase ledger rows.
+create_tables()
+
 if __name__ == "__main__":
-    create_tables()
     app.run(host="127.0.0.1", port=5000, debug=True)

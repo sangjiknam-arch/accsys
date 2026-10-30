@@ -7,7 +7,7 @@ import sqlite3
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_NAME = os.path.join(BASE_DIR, "church.db")
+DB_NAME = os.environ.get("CHURCH_DB_PATH") or os.path.join(BASE_DIR, "church.db")
 
 
 MISSION_INCOME_CATEGORIES = [
@@ -156,6 +156,11 @@ def ensure_users_schema(conn):
         conn.execute("""
             ALTER TABLE users
             ADD COLUMN role TEXT NOT NULL DEFAULT 'user'
+        """)
+        # A legacy admin account must remain an administrator after migration.
+        # Change only when adding a previously missing permission column.
+        conn.execute("""
+            UPDATE users SET role = 'admin' WHERE userid = 'admin'
         """)
 
 
