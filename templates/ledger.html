@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}총계정원장 - 교회 회계{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>총계정원장</h1><p class="muted">계정 하나 또는 조회범위의 모든 계정을 볼 수 있습니다.</p></div>
+  {% if ledgers %}<button type="button" class="secondary no-print" onclick="window.print()">인쇄</button>{% endif %}
+</div>
+
+<form class="search-bar no-print" method="get">
+  <label>계정과목
+    <select name="account">
+      <option value="">계정과목 선택</option>
+      {% for a in accounts %}
+      <option value="{{ a.code }}" {% if selected and selected.code == a.code %}selected{% endif %}>
+        {{ a.code }} {{ a.name }} [{{ a.type }}]
+      </option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>시작일 <input type="date" name="start" value="{{ start }}" required></label>
+  <label>종료일 <input type="date" name="end" value="{{ end }}" required></label>
+  <button class="primary small" type="submit">조회</button>
+  <button class="secondary small" type="submit" name="all" value="1">범위 전체</button>
+</form>
+
+{% if not ledgers %}
+<div class="card"><p>계정과목을 선택하여 조회하거나 <b>범위 전체</b>를 누르십시오.</p></div>
+{% endif %}
+
+{% for ledger in ledgers %}
+<section class="ledger-section">
+<h2 class="account-title">{{ ledger.account.code }} {{ ledger.account.name }} [{{ ledger.account.type }}]</h2>
+<div class="table-wrap">
+<table class="report-table">
+<thead><tr>
+<th>일자</th><th>전표번호</th><th>상대 계정과목</th><th>적요</th>
+<th class="num">차변</th><th class="num">대변</th><th class="num">잔액</th><th>잔액구분</th>
+</tr></thead>
+<tbody>
+{% for row in ledger.rows %}
+<tr>
+<td class="center">{{ row.date }}</td><td class="center">{{ row.journal_no }}</td>
+<td>{{ row.counter_account }}</td><td>{{ row.remark }}</td>
+<td class="num">{% if row.debit %}{{ "{:,.0f}".format(row.debit) }}{% endif %}</td>
+<td class="num">{% if row.credit %}{{ "{:,.0f}".format(row.credit) }}{% endif %}</td>
+<td class="num">{{ "{:,.0f}".format(row.balance|abs) }}</td>
+<td class="center">{{ row.balance_side }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<table class="ledger-summary">
+<tr>
+<th>전기이월</th><td>{{ "{:,.0f}".format(ledger.opening_balance|abs) }}원 ({{ ledger.opening_side }})</td>
+<th>차변합계</th><td>{{ "{:,.0f}".format(ledger.total_debit) }}원</td>
+</tr>
+<tr>
+<th>대변합계</th><td>{{ "{:,.0f}".format(ledger.total_credit) }}원</td>
+<th>기말잔액</th><td class="closing">{{ "{:,.0f}".format(ledger.closing_balance|abs) }}원 ({{ ledger.closing_side }})</td>
+</tr>
+</table>
+</section>
+{% endfor %}
+{% endblock %}

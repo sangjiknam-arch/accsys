@@ -1,0 +1,43 @@
+{% extends "base.html" %}{% block title %}주계표{% endblock %}
+{% block content %}<h1>주계표</h1>
+<div class="tabs"><button onclick="showTab('income')">수입</button><button onclick="showTab('expense')">지출</button></div>
+
+<section id="income" class="tab-panel">
+<div class="card"><h2>헌금 수입 입력</h2><form method="post" action="{{url_for('save_income')}}" class="form-grid">
+<label>헌금일<input type="date" name="journal_date" value="{{today}}" required></label>
+<label>헌금자<select name="member_no" required><option value="">선택</option>{% for m in members %}
+<option value="{{m['member_no']}}">{{m['name']}}{% if m['position'] %} ({{m['position']}}){% endif %}</option>{% endfor %}</select></label>
+<label>헌금종류<select name="offering_code" required><option value="">선택</option>{% for a in income_accounts %}
+<option value="{{a['code']}}">{{a['code']}} {{a['name']}}</option>{% endfor %}</select></label>
+<label>헌금액<input name="amount" inputmode="numeric" required></label>
+<label class="wide">헌금 적요<input name="summary"></label><div class="wide right"><button class="primary">수입 저장</button></div>
+</form></div>
+<div class="card"><h2>최근 수입 전표</h2><div class="table-wrap"><table><thead><tr><th>전표번호</th><th>일자</th><th>헌금자</th><th>헌금종류</th><th>헌금액</th><th>적요</th><th></th></tr></thead><tbody>
+{% for r in incomes %}<tr><td>{{r['journal_no']}}</td><td>{{r['journal_date']}}</td><td>{{r['member_name']}}</td><td>{{r['account_name']}}</td>
+<td class="amount">{{"{:,.0f}".format(r['amount'])}}</td><td>{{r['summary']}}</td><td class="actions">
+<a href="{{url_for('edit_income',journal_no=r['journal_no'])}}">수정</a>
+<form method="post" action="{{url_for('delete_journal',journal_no=r['journal_no'])}}" onsubmit="return confirm('삭제하시겠습니까?')"><button class="link danger-text">삭제</button></form>
+</td></tr>{% endfor %}</tbody></table></div></div>
+</section>
+
+<section id="expense" class="tab-panel hidden">
+<div class="card"><h2>지출 입력</h2><form method="post" action="{{url_for('save_expense')}}" class="form-grid">
+<label>지출일<input type="date" name="journal_date" value="{{today}}" required></label>
+<label>지출항목<select name="expense_code" required><option value="">선택</option>{% for a in expense_accounts %}
+<option value="{{a['code']}}">{{a['code']}} {{a['name']}}</option>{% endfor %}</select></label>
+<label>지출금액<input name="amount" inputmode="numeric" required></label>
+<label class="wide">지출 적요<input name="summary"></label><div class="wide right"><button class="primary">지출 저장</button></div>
+</form></div>
+<div class="card"><h2>최근 지출 전표</h2><div class="table-wrap"><table><thead><tr><th>전표번호</th><th>일자</th><th>지출항목</th><th>지출금액</th><th>적요</th><th></th></tr></thead><tbody>
+{% for r in expenses %}<tr><td>{{r['journal_no']}}</td><td>{{r['journal_date']}}</td><td>{{r['account_name']}}</td>
+<td class="amount">{{"{:,.0f}".format(r['amount'])}}</td><td>{{r['summary']}}</td><td class="actions">
+<a href="{{url_for('edit_expense',journal_no=r['journal_no'])}}">수정</a>
+<form method="post" action="{{url_for('delete_journal',journal_no=r['journal_no'])}}" onsubmit="return confirm('삭제하시겠습니까?')"><button class="link danger-text">삭제</button></form>
+</td></tr>{% endfor %}</tbody></table></div></div>
+</section>
+
+<div class="summary"><b>수입합계 {{'{:,}'.format(total_income)}}원</b><b>지출합계 {{'{:,}'.format(total_expense)}}원</b><b class="red">차액 {{'{:,}'.format(difference)}}원</b></div>
+{% endblock %}
+{% block script %}<script>
+function showTab(id){document.querySelectorAll('.tab-panel').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden')}
+</script>{% endblock %}

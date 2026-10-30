@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block title %}일계표{% endblock %}{% block content %}
+<div class="print-actions"><form><label>기준일 <input type="date" name="date" value="{{target_date}}"></label><button>조회</button></form><button onclick="window.print()">인쇄</button></div>
+<div class="sheet"><h1>일 계 표</h1><p class="center">기준일: {{target_date}}</p>
+<h2>금일 수입 내역</h2><table><tr><th>전표번호</th><th>헌금일</th><th>헌금자</th><th>헌금종류</th><th>헌금액</th><th>적요</th></tr>
+{% for r in incomes %}<tr>{% for i in range(4) %}<td>{{r[i]}}</td>{% endfor %}<td class="amount">{{"{:,.0f}".format(r[4])}}</td><td>{{r[5]}}</td></tr>{% endfor %}</table>
+<h2>금일 지출 내역</h2><table><tr><th>전표번호</th><th>지출일</th><th>지출항목</th><th>지출금액</th><th>적요</th></tr>
+{% for r in expenses %}<tr><td>{{r[0]}}</td><td>{{r[1]}}</td><td>{{r[2]}}</td><td class="amount">{{"{:,.0f}".format(r[3])}}</td><td>{{r[4]}}</td></tr>{% endfor %}</table>
+<table class="totals"><tr><th>전일 잔액</th><td>{{"{:,}".format(previous_balance)}}원</td><th>금일 지출합계</th><td>{{"{:,}".format(today_expense)}}원</td></tr>
+<tr><th>금일 수입합계</th><td>{{"{:,}".format(today_income)}}원</td><th>금일 잔액</th><td>{{"{:,}".format(today_balance)}}원</td></tr>
+<tr><th>합계</th><td>{{"{:,}".format(receipt_total)}}원</td><th>합계</th><td>{{"{:,}".format(payment_total)}}원</td></tr></table>
+</div>{% endblock %}

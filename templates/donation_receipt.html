@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}기부금 영수증{% endblock %}
+{% block content %}
+<div class="page-head no-print"><div><h1>기부금 영수증</h1><p class="muted">주계표의 헌금자료를 기부자와 연도별로 자동 합산합니다.</p></div></div>
+
+{% if not preview %}
+<div class="two-col">
+<form method="get" class="card form-card">
+<input type="hidden" name="preview" value="1">
+<label>일련번호</label><input name="serial_number" value="{{ serial_number }}">
+<label>기부자 성명 *</label><input name="donor_name" list="member-list" value="{{ donor_name }}" required>
+<datalist id="member-list">{% for m in members %}<option value="{{ m.name }}">{% endfor %}</datalist>
+<label>주민등록번호/사업자번호</label><input name="donor_number" value="{{ donor_number }}">
+<label>주소</label><input name="donor_address" value="{{ donor_address }}">
+<label>발급연도</label><input type="number" name="year" min="2000" max="2100" value="{{ year }}">
+<label>기부금 코드</label><select name="donation_code"><option value="41" {% if donation_code=='41' %}selected{% endif %}>41 - 종교단체 기부금</option><option value="40">40 - 일반 기부금</option><option value="10">10 - 법정 기부금</option></select>
+<label>발급일</label><input type="date" name="issue_date" value="{{ issue_date }}">
+<button class="primary small">영수증 미리보기</button>
+</form>
+
+<form method="post" class="card form-card">
+<input type="hidden" name="action" value="save_church">
+<label>교회명</label><input name="church_name" value="{{ church[0] }}">
+<label>고유번호</label><input name="unique_number" value="{{ church[1] }}">
+<label>주소</label><input name="church_address" value="{{ church[2] }}">
+<label>대표자</label><input name="representative" value="{{ church[3] }}">
+<label>근거법령</label><input name="legal_basis" value="{{ church[4] }}">
+<button class="secondary small">교회정보 저장</button>
+</form>
+</div>
+{% else %}
+<div class="no-print receipt-actions"><button class="secondary" onclick="window.print()">인쇄 / PDF 저장</button><button class="secondary" onclick="history.back()">입력으로 돌아가기</button></div>
+
+<div class="receipt-paper">
+<div class="small">소득세법 시행규칙 [별지 제45호의2서식]</div>
+<table class="serial-table"><tr><td>일련번호</td><td>{{ serial_number }}</td></tr></table>
+<h1 class="receipt-title">기부금영수증</h1>
+
+<h3>1. 기부자</h3><table class="receipt-table"><tr><th>성명(법인명)</th><td>{{ donor_name }}</td><th>주민등록번호<br>(사업자등록번호)</th><td>{{ donor_number }}</td></tr><tr><th>주소(소재지)</th><td colspan="3">{{ donor_address }}</td></tr></table>
+<h3>2. 기부금단체</h3><table class="receipt-table"><tr><th>단체명</th><td>{{ church[0] }}</td><th>사업자등록번호<br>(고유번호)</th><td>{{ church[1] }}</td></tr><tr><th>소재지</th><td>{{ church[2] }}</td><th>기부금공제대상 근거법령</th><td>{{ church[4] }}</td></tr></table>
+<h3>3. 기부 내용</h3>
+<table class="receipt-table"><thead><tr><th>유형</th><th>코드</th><th>구분</th><th>기간</th><th>내용</th><th>금액</th></tr></thead><tbody>
+{% for name, amount in summary.items() %}<tr><td class="center">종교단체</td><td class="center">{{ donation_code }}</td><td class="center">금전</td><td class="center">{{ year }}.01.01 ~ {{ year }}.12.31</td><td>{{ name }}</td><td class="num">₩{{ "{:,}".format(amount) }}</td></tr>{% endfor %}
+<tr class="total-row"><th colspan="5">합계</th><td class="num">₩{{ "{:,}".format(total) }}</td></tr>
+</tbody></table>
+<p class="receipt-statement">위와 같이 기부금을 기부하였음을 확인합니다.</p>
+<p class="receipt-sign">{{ issue_date }}<br><b>{{ church[0] }}</b> 대표자 {{ church[3] }} (직인)</p>
+</div>
+{% endif %}
+{% endblock %}

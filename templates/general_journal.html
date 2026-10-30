@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}일반분개{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>일반분개</h1><p class="muted">차변 합계와 대변 합계가 반드시 일치해야 저장됩니다.</p></div></div>
+<form method="post" class="card" id="gj-form">
+<input type="hidden" name="journal_no" value="{{ edit_master.journal_no if edit_master else '' }}">
+<div class="form-grid">
+<label>분개번호<input value="{{ edit_master.journal_no if edit_master else '(저장 시 자동생성)' }}" readonly></label>
+<label>분개일자<input type="date" name="journal_date" value="{{ edit_master.journal_date if edit_master else today }}" required></label>
+<label class="wide">전체 적요<input name="summary" value="{{ edit_master[2] if edit_master else '' }}" required></label>
+</div>
+<div class="table-wrap">
+<table class="report-table" id="detail-table">
+<thead><tr><th>계정과목</th><th>차변</th><th>대변</th><th>세부 적요</th><th class="no-print">삭제</th></tr></thead>
+<tbody id="detail-body">
+{% set details = edit_details if edit_details else [None, None] %}
+{% for d in details %}
+<tr>
+<td><select name="account_code" required>
+<option value="">계정과목 선택</option>
+{% for a in accounts %}<option value="{{ a.code }}" {% if d and d.account_code==a.code %}selected{% endif %}>{{ a.code }} - {{ a.name }}</option>{% endfor %}
+</select></td>
+<td><input class="money debit" name="debit" value="{{ ('{:,.2f}'.format(d.debit).rstrip('0').rstrip('.')) if d and d.debit else '' }}"></td>
+<td><input class="money credit" name="credit" value="{{ ('{:,.2f}'.format(d.credit).rstrip('0').rstrip('.')) if d and d.credit else '' }}"></td>
+<td><input name="remark" value="{{ d.remark if d else '' }}"></td>
+<td class="center no-print"><button type="button" class="danger small" onclick="this.closest('tr').remove(); calcTotals()">행삭제</button></td>
+</tr>
+{% endfor %}
+</tbody></table></div>
+<div class="summary-strip"><span>차변 합계: <b id="debit-total">0</b></span><span>대변 합계: <b id="credit-total">0</b></span><span>차이: <b id="diff-total">0</b></span></div>
+<div class="form-actions no-print">
+<button type="button" class="secondary small" onclick="addRow()">행 추가</button>
+{% if edit_master %}
+<button class="primary small" name="action" value="save">선택 분개 수정</button>
+<button class="danger small" name="action" value="delete" onclick="return confirm('이 일반분개를 삭제하시겠습니까?')">분개 삭제</button>
+<a class="secondary small link-btn" href="{{ url_for('general_journal') }}">신규</a>
+{% else %}
+<button class="primary small" name="action" value="save">저장</button>
+{% endif %}
+</div>
+</form>
+
+<h2>최근 일반분개 200건</h2>
+<div class="table-wrap"><table class="report-table"><thead><tr><th>분개번호</th><th>일자</th><th>적요</th><th>차변합계</th><th>대변합계</th><th class="no-print">선택</th></tr></thead>
+<tbody>{% for r in recent %}<tr><td>{{ r.journal_no }}</td><td class="center">{{ r.journal_date }}</td><td>{{ r.summary }}</td>
+<td class="num">{{ "{:,.0f}".format(r.debit_total) }}</td><td class="num">{{ "{:,.0f}".format(r.credit_total) }}</td>
+<td class="center no-print"><a href="{{ url_for('general_journal', edit=r.journal_no) }}">수정</a></td></tr>{% endfor %}</tbody></table></div>
+
+<template id="row-template"><tr>
+<td><select name="account_code"><option value="">계정과목 선택</option>{% for a in accounts %}<option value="{{ a.code }}">{{ a.code }} - {{ a.name }}</option>{% endfor %}</select></td>
+<td><input class="money debit" name="debit"></td><td><input class="money credit" name="credit"></td>
+<td><input name="remark"></td><td class="center no-print"><button type="button" class="danger small" onclick="this.closest('tr').remove(); calcTotals()">행삭제</button></td></tr></template>
+<script>
+function n(v){v=(v||'').replaceAll(',','').trim(); return Number(v)||0;}
+function calcTotals(){let d=0,c=0;document.querySelectorAll('.debit').forEach(x=>d+=n(x.value));document.querySelectorAll('.credit').forEach(x=>c+=n(x.value));document.getElementById('debit-total').textContent=d.toLocaleString();document.getElementById('credit-total').textContent=c.toLocaleString();document.getElementById('diff-total').textContent=(d-c).toLocaleString();}
+function addRow(){document.getElementById('detail-body').append(document.getElementById('row-template').content.cloneNode(true));bind();}
+function bind(){document.querySelectorAll('.money').forEach(x=>{x.oninput=calcTotals;});}
+bind();calcTotals();
+</script>
+{% endblock %}

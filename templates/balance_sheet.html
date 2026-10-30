@@ -1,0 +1,32 @@
+﻿{% extends "base.html" %}
+{% block title %}대차대조표 - 교회 회계{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>대차대조표(재무상태표)</h1><p class="muted">기준일 현재 자산·부채·순자산과 당기손익을 표시합니다.</p></div>
+  <button type="button" class="secondary no-print" onclick="window.print()">인쇄</button>
+</div>
+<form class="search-bar no-print" method="get">
+  <label>기준일 <input type="date" name="as_of" value="{{ data.as_of }}" required></label>
+  <button class="primary small" type="submit">조회</button>
+  <button class="secondary small" type="submit" name="year_end" value="1">회계연도 말</button>
+</form>
+<div class="table-wrap">
+<table class="report-table">
+<thead><tr><th>구분</th><th>계정코드</th><th>계정명</th><th>차변</th><th>대변</th><th>잔액</th><th>잔액구분</th></tr></thead>
+<tbody>
+{% for row in data.rows %}
+<tr {% if row.code == '자동' %}class="result-row"{% endif %}>
+<td class="center">{{ row.type }}</td><td class="center">{{ row.code }}</td><td>{{ row.name }}</td>
+<td class="num">{% if row.debit %}{{ "{:,}".format(row.debit) }}{% endif %}</td>
+<td class="num">{% if row.credit %}{{ "{:,}".format(row.credit) }}{% endif %}</td>
+<td class="num">{{ "{:,}".format(row.balance) }}</td><td class="center">{{ row.balance_side }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<table class="ledger-summary statement-summary">
+<tr><th>차변합계</th><td>{{ "{:,}".format(data.total_debit) }}원</td><th>대변합계</th><td>{{ "{:,}".format(data.total_credit) }}원</td></tr>
+<tr><th>차액</th><td class="{% if data.difference == 0 %}ok{% else %}closing{% endif %}">{{ "{:,}".format(data.difference) }}원</td><th>상태</th><td class="{% if data.difference == 0 %}ok{% else %}closing{% endif %}">{{ data.status }}</td></tr>
+</table>
+{% endblock %}

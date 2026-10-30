@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}계정과목 관리{% endblock %}
+{% block content %}
+<h1>계정과목 관리</h1>
+<div class="two-col">
+<form method="post" class="card form-card">
+<input type="hidden" name="original_code" value="{{ selected.code if selected else '' }}">
+<label>계정코드 *</label>
+<input name="code" value="{{ selected.code if selected else '' }}" {% if selected %}readonly{% endif %} required>
+<label>계정명 *</label>
+<input name="name" value="{{ selected.name if selected else '' }}" required>
+<label>계정구분</label>
+<select name="type">
+{% for t in account_types %}<option value="{{ t }}" {% if selected and selected.type==t %}selected{% endif %}>{{ t or '(공백)' }}</option>{% endfor %}
+</select>
+<div class="form-actions">
+{% if selected %}
+<button class="primary small" name="action" value="update">수정</button>
+<button class="danger small" name="action" value="delete" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+<a class="secondary small link-btn" href="{{ url_for('accounts_manage') }}">신규</a>
+{% else %}
+<button class="primary small" name="action" value="save">저장</button>
+{% endif %}
+</div>
+</form>
+<div class="table-wrap">
+<table class="report-table"><thead><tr><th>계정코드</th><th>계정명</th><th>계정구분</th><th class="no-print">선택</th></tr></thead>
+<tbody>{% for r in rows %}<tr><td class="center">{{ r.code }}</td><td>{{ r.name }}</td><td class="center">{{ r.type }}</td>
+<td class="center no-print"><a href="{{ url_for('accounts_manage', edit=r.code) }}">수정</a></td></tr>{% endfor %}</tbody></table>
+</div></div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>교회 회계 프로그램</h1>
+<p class="muted">웹 브라우저에서 사용하는 통합 메뉴입니다.</p>
+
+<h2>입력·관리</h2>
+<div class="menu-grid">
+<a class="menu-card" href="{{ url_for('journal') }}"><b>주계표</b><span>헌금 수입·지출 입력</span></a>
+<a class="menu-card" href="{{ url_for('general_journal') }}"><b>일반분개</b><span>차변·대변 직접 분개</span></a>
+<a class="menu-card" href="{{ url_for('accounts_manage') }}"><b>계정과목 관리</b><span>계정 등록·수정·삭제</span></a>
+<a class="menu-card" href="{{ url_for('members_manage') }}"><b>교인 관리</b><span>교인 등록·검색·수정</span></a>
+<a class="menu-card" href="{{ url_for('budget_manage') }}"><b>예산 관리</b><span>결산액과 편성예산 비교</span></a>
+<a class="menu-card" href="{{ url_for('donation_receipt') }}"><b>기부금 영수증</b><span>헌금 종류별 자동 합산·인쇄</span></a>
+</div>
+
+<h2>장부·보고서</h2>
+<div class="menu-grid">
+<a class="menu-card" href="{{ url_for('daily_statement') }}"><b>일계표</b><span>전일잔액·금일 수입·지출</span></a>
+<a class="menu-card" href="{{ url_for('cashbook') }}"><b>현금출납장</b><span>현금 흐름과 잔액</span></a>
+<a class="menu-card" href="{{ url_for('ledger') }}"><b>총계정원장</b><span>계정별·범위 전체 원장</span></a>
+<a class="menu-card" href="{{ url_for('trial_balance') }}"><b>합계잔액시산표</b><span>차변·대변 합계와 잔액</span></a>
+<a class="menu-card" href="{{ url_for('balance_sheet') }}"><b>대차대조표</b><span>자산·부채·순자산</span></a>
+<a class="menu-card" href="{{ url_for('income_statement') }}"><b>손익계산서</b><span>수입·지출·당기순손익</span></a>
+</div>
+{% endblock %}

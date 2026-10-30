@@ -1,0 +1,10 @@
+<!doctype html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}교회 회계{% endblock %}</title>
+<link rel="stylesheet" href="{{url_for('static',filename='style.css')}}"></head><body>
+{% if session.get("user") %}<header class="topbar"><b>교회 회계 웹</b>
+<nav><a href="{{url_for('dashboard')}}">메인</a><a href="{{url_for('journal')}}">주계표</a>
+<a href="{{url_for('daily_statement')}}">일계표</a><a href="{{url_for('logout')}}">로그아웃</a></nav></header>{% endif %}
+<main class="container">{% with msgs=get_flashed_messages(with_categories=true) %}{% for c,m in msgs %}
+<div class="flash {{c}}">{{m}}</div>{% endfor %}{% endwith %}{% block content %}{% endblock %}</main>
+{% block script %}{% endblock %}</body></html>

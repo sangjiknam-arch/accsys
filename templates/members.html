@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}교인 관리{% endblock %}
+{% block content %}
+<h1>교인 기본정보 관리</h1>
+<form method="get" class="search-bar no-print">
+<label>성명 또는 휴대폰 <input name="q" value="{{ keyword }}"></label>
+<button class="primary small">검색</button><a class="secondary small link-btn" href="{{ url_for('members_manage') }}">전체보기</a>
+</form>
+<div class="two-col member-layout">
+<form method="post" class="card form-card">
+<input type="hidden" name="member_no" value="{{ selected.member_no if selected else '' }}">
+<label>교인번호</label><input value="{{ selected.member_no if selected else '(자동생성)' }}" readonly>
+<label>성명 *</label><input name="name" value="{{ selected.name if selected else '' }}" required>
+<label>휴대폰번호</label><input name="phone" value="{{ selected[2] if selected else '' }}">
+<label>주소</label><input name="address" value="{{ selected[3] if selected else '' }}">
+<label>등록일</label><input type="date" name="reg_date" value="{{ selected[4] if selected else '' }}">
+<label>세례일</label><input type="date" name="baptism_date" value="{{ selected[5] if selected else '' }}">
+<label>직분</label><select name="position">{% for p in positions %}<option value="{{ p }}" {% if selected and selected[6]==p %}selected{% endif %}>{{ p or '(없음)' }}</option>{% endfor %}</select>
+<label>기타</label><textarea name="memo" rows="4">{{ selected[7] if selected else '' }}</textarea>
+<div class="form-actions">
+{% if selected %}
+<button class="primary small" name="action" value="update">수정</button>
+<button class="danger small" name="action" value="delete" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+<a class="secondary small link-btn" href="{{ url_for('members_manage') }}">신규</a>
+{% else %}
+<button class="primary small" name="action" value="save">저장</button>
+{% endif %}
+</div>
+</form>
+<div class="table-wrap">
+<table class="report-table"><thead><tr><th>번호</th><th>성명</th><th>휴대폰</th><th>주소</th><th>등록일</th><th>세례일</th><th>직분</th><th class="no-print">선택</th></tr></thead>
+<tbody>{% for r in rows %}<tr><td class="center">{{ r[0] }}</td><td>{{ r[1] }}</td><td>{{ r[2] }}</td><td>{{ r[3] }}</td><td>{{ r[4] }}</td><td>{{ r[5] }}</td><td>{{ r[6] }}</td>
+<td class="center no-print"><a href="{{ url_for('members_manage', edit=r[0], q=keyword) }}">수정</a></td></tr>{% endfor %}</tbody></table>
+</div></div>
+{% endblock %}

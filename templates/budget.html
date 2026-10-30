@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}예산 관리{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>예산 관리</h1><p class="muted">{{ actual_year }}년도 결산액과 {{ budget_year }}년도 편성예산을 비교합니다.</p></div>
+<button class="secondary no-print" onclick="window.print()">인쇄</button></div>
+<form method="get" class="search-bar no-print"><label>편성 예산연도<input type="number" name="year" min="2000" max="2100" value="{{ budget_year }}"></label><button class="primary small">조회</button></form>
+
+<form method="post" class="card no-print">
+<input type="hidden" name="year" value="{{ budget_year }}">
+<input type="hidden" name="budget_id" value="{{ selected.budget_id if selected else '' }}">
+<div class="form-grid">
+<label>계정과목<select name="account_id" required><option value="">선택</option>{% for a in accounts %}<option value="{{ a.id }}" {% if selected and selected.account_id==a.id %}selected{% endif %}>[{{ a.normalized_type }}] {{ a.code }} {{ a.name }}</option>{% endfor %}</select></label>
+<label>편성 예산금액<input name="amount" value="{{ '{:,}'.format(selected.budget) if selected else '' }}" required></label>
+</div>
+<div class="form-actions">
+{% if selected %}
+<button class="primary small" name="action" value="update">수정</button>
+<button class="danger small" name="action" value="delete" onclick="return confirm('이 예산을 삭제하시겠습니까?')">삭제</button>
+<a class="secondary small link-btn" href="{{ url_for('budget_manage', year=budget_year) }}">신규</a>
+{% else %}<button class="primary small" name="action" value="save">저장</button>{% endif %}
+</div></form>
+
+<div class="table-wrap"><table class="report-table">
+<thead><tr><th>계정코드</th><th>계정명</th><th>구분</th><th>{{ actual_year }} 결산액</th><th>수입 편성예산</th><th>지출 편성예산</th><th>증감액</th><th>증감률</th><th class="no-print">선택</th></tr></thead>
+<tbody>{% for r in rows %}<tr><td class="center">{{ r.code }}</td><td>{{ r.name }}</td><td class="center">{{ r.type }}</td><td class="num">{{ "{:,}".format(r.actual) }}</td>
+<td class="num">{% if r.type=='수입' %}{{ "{:,}".format(r.budget) }}{% endif %}</td><td class="num">{% if r.type=='지출' %}{{ "{:,}".format(r.budget) }}{% endif %}</td>
+<td class="num">{{ "{:+,}".format(r.difference) }}</td><td class="center">{{ r.rate }}</td><td class="center no-print">{% if r.budget_id %}<a href="{{ url_for('budget_manage', year=budget_year, edit=r.budget_id) }}">수정</a>{% else %}-{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+<div class="summary-strip budget-summary"><span>수입 결산합계 <b>{{ "{:,}".format(income_actual) }}</b></span><span>지출 결산합계 <b>{{ "{:,}".format(expense_actual) }}</b></span><span>수입 예산합계 <b>{{ "{:,}".format(income_budget) }}</b></span><span>지출 예산합계 <b>{{ "{:,}".format(expense_budget) }}</b></span><span>예산 수지차액 <b>{{ "{:+,}".format(budget_balance) }}</b></span></div>
+{% endblock %}

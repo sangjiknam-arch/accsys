@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block content %}<div class="card"><h1>수입 전표 수정</h1>
+<form method="post" class="form-grid"><label>전표번호<input value="{{row['journal_no']}}" disabled></label>
+<label>헌금일<input type="date" name="journal_date" value="{{row['journal_date']}}" required></label>
+<label>헌금자<select name="member_no">{% for m in members %}<option value="{{m['member_no']}}" {% if m['member_no']==row['member_no'] %}selected{% endif %}>{{m['name']}}</option>{% endfor %}</select></label>
+<label>헌금종류<select name="offering_code">{% for a in income_accounts %}<option value="{{a['code']}}" {% if a['code']==row['offering_code'] %}selected{% endif %}>{{a['code']}} {{a['name']}}</option>{% endfor %}</select></label>
+<label>금액<input name="amount" value="{{row['amount']|int}}" required></label><label class="wide">적요<input name="summary" value="{{row['summary']}}"></label>
+<div class="wide right"><a class="button secondary" href="{{url_for('journal')}}">취소</a><button class="primary">수정 저장</button></div></form></div>{% endblock %}
