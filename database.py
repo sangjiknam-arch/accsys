@@ -385,6 +385,39 @@ def create_tables():
             )
         """)
 
+        # 복식부기 전표 원장: 기존 DB의 전표는 보존하고 누락된 테이블만 생성
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS journal_master (
+                journal_no TEXT PRIMARY KEY,
+                journal_date TEXT NOT NULL,
+                member_no INTEGER,
+                offering_code TEXT,
+                summary TEXT,
+                input_user TEXT
+            )
+        """)
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS journal_detail (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                journal_no TEXT NOT NULL,
+                account_code TEXT NOT NULL,
+                debit INTEGER NOT NULL DEFAULT 0,
+                credit INTEGER NOT NULL DEFAULT 0,
+                remark TEXT,
+                FOREIGN KEY (journal_no) REFERENCES journal_master(journal_no)
+            )
+        """)
+
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_journal_master_date
+            ON journal_master(journal_date)
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_journal_detail_account
+            ON journal_detail(account_code)
+        """)
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS offering (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
